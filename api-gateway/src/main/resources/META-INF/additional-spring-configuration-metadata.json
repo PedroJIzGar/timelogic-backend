@@ -1,0 +1,35 @@
+{
+  "properties": [
+
+    {
+      "name": "security.public-paths",
+      "type": "java.util.List",
+      "description": "Public paths (no token required) that bypass the Firebase filter."
+    },
+    {
+      "name": "cors.allowed-origins",
+      "type": "java.lang.String",
+      "description": "Comma-separated list of allowed origins for CORS."
+    },
+    {
+      "name": "cors.allowed-methods",
+      "type": "java.lang.String",
+      "description": "Comma-separated list of allowed HTTP methods for CORS."
+    },
+    {
+      "name": "cors.allowed-headers",
+      "type": "java.lang.String",
+      "description": "Comma-separated list of allowed headers for CORS. Use '*' for any."
+    },
+    {
+      "name": "cors.exposed-headers",
+      "type": "java.lang.String",
+      "description": "Comma-separated list of exposed headers for CORS."
+    },
+    {
+      "name": "cors.allow-credentials",
+      "type": "java.lang.Boolean",
+      "description": "Allow CORS credentials."
+    }
+  ]
+}

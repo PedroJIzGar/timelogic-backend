@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  user-db:
+    image: postgres:16-alpine
+    container_name: tl-user-db
+    environment:
+      POSTGRES_DB: userdb
+      POSTGRES_USER: timelogic
+      POSTGRES_PASSWORD: timelogic
+    ports:
+      - "5433:5432"
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+
+  timeclock-db:
+    image: postgres:16-alpine
+    container_name: tl-timeclock-db
+    environment:
+      POSTGRES_DB: timeclockdb
+      POSTGRES_USER: timelogic
+      POSTGRES_PASSWORD: timelogic
+    ports:
+      - "5434:5432"
+    volumes:
+      - timeclock_db_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: tl-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@timelogic.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    depends_on:
+      - user-db
+      - timeclock-db
+
+volumes:
+  user_db_data:
+  timeclock_db_data:

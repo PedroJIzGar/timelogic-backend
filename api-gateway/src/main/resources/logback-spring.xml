@@ -1,0 +1,108 @@
+<configuration>
+
+  <!-- Lee propiedades del contexto Spring -->
+  <springProperty name="APP_NAME" source="spring.application.name" defaultValue="api-gateway"/>
+  <springProperty name="LOG_PATH" source="logging.file.path" defaultValue="./logs"/>
+
+  <!-- ========== PATRONES ========== -->
+  <!-- Muestra requestId si está en el MDC (si no, queda vacío) -->
+  <property name="CONSOLE_LOG_PATTERN"
+            value="%d{HH:mm:ss.SSS} %-5level [%X{requestId}] [%thread] %logger{36} - %msg%n"/>
+
+  <property name="FILE_LOG_PATTERN"
+            value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{requestId}] %logger{36} - %msg%n"/>
+
+  <!-- ========== APPENDER CONSOLA ========== -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- ========== APPENDER FICHERO ROTATIVO GENERAL ========== -->
+  <appender name="ROLLING"
+            class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_PATH}/${APP_NAME}.log</file>
+    <encoder>
+      <pattern>${FILE_LOG_PATTERN}</pattern>
+    </encoder>
+
+    <!-- Política de rotación: diario + por tamaño -->
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <!-- Archivo rotado -->
+      <fileNamePattern>${LOG_PATH}/archive/${APP_NAME}.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+      <!-- Cada fichero hasta 20 MB -->
+      <maxFileSize>20MB</maxFileSize>
+      <!-- Conserva 30 días de histórico -->
+      <maxHistory>30</maxHistory>
+      <!-- Límite total de disco del histórico -->
+      <totalSizeCap>2GB</totalSizeCap>
+    </rollingPolicy>
+  </appender>
+
+  <!-- ========== APPENDER FICHERO ROTATIVO SOLO ERRORES ========== -->
+  <appender name="ERRORS"
+            class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_PATH}/${APP_NAME}-error.log</file>
+    <encoder>
+      <pattern>${FILE_LOG_PATTERN}</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>ERROR</level>
+    </filter>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_PATH}/archive/${APP_NAME}-error.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+      <maxFileSize>10MB</maxFileSize>
+      <maxHistory>60</maxHistory>
+      <totalSizeCap>1GB</totalSizeCap>
+    </rollingPolicy>
+  </appender>
+
+  <!-- ========== APPENDERS ASÍNCRONOS (mejor rendimiento) ========== -->
+  <appender name="ASYNC_ROLLING" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="ROLLING"/>
+    <queueSize>8192</queueSize>
+    <discardingThreshold>0</discardingThreshold>
+  </appender>
+
+  <appender name="ASYNC_ERRORS" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="ERRORS"/>
+    <queueSize>4096</queueSize>
+    <discardingThreshold>0</discardingThreshold>
+  </appender>
+
+  <!-- ========== NIVELES POR DEFECTO ========== -->
+  <!-- Baja el ruido -->
+  <logger name="reactor.netty" level="WARN"/>
+  <logger name="org.springframework.cloud.gateway" level="INFO"/>
+  <logger name="org.springframework.web" level="INFO"/>
+
+  <!-- ========== PERFIL: DESARROLLO ========== -->
+  <springProfile name="dev,local">
+    <root level="INFO">
+      <appender-ref ref="STDOUT"/>
+      <appender-ref ref="ASYNC_ROLLING"/>
+      <appender-ref ref="ASYNC_ERRORS"/>
+    </root>
+
+    <!-- Si quieres ver más detalle del gateway en local: -->
+    <!-- <logger name="org.springframework.cloud.gateway" level="DEBUG"/> -->
+  </springProfile>
+
+  <!-- ========== PERFIL: PRODUCCIÓN ========== -->
+  <springProfile name="prod">
+    <root level="INFO">
+      <appender-ref ref="ASYNC_ROLLING"/>
+      <appender-ref ref="ASYNC_ERRORS"/>
+    </root>
+  </springProfile>
+
+  <!-- Fallback si no hay perfil -->
+  <springProfile name="!dev,!local,!prod">
+    <root level="INFO">
+      <appender-ref ref="STDOUT"/>
+      <appender-ref ref="ASYNC_ROLLING"/>
+      <appender-ref ref="ASYNC_ERRORS"/>
+    </root>
+  </springProfile>
+</configuration>

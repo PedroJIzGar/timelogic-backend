@@ -1,0 +1,16 @@
+server:
+  port: 8091
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/userdb
+    username: timelogic
+    password: timelogic
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+jwt:
+  issuer: timelogic-gw
+  audience: timelogic-services
+  secret: "CHANGE_ME_min_32_chars"
