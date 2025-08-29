@@ -1,17 +1,80 @@
 server:
   port: 8080
 
-auth:
-  internal:
-    enabled: true
-    issuer: timelogic-gw
-    audience: timelogic-services
-    ttl-seconds: 600
-    secret: "CHANGE_ME_min_32_chars"
+spring:
+  application:
+    name: api-gateway
+  codec:
+    max-in-memory-size: 10MB
+  cloud:
+    gateway:
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 30s
+        wiretap: false
+      default-filters:
+        - 'RemoveRequestHeader=Cookie'
+        - 'RemoveResponseHeader=Set-Cookie'
+        - 'DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_UNIQUE'
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**
+        - id: timeclock-service
+          uri: lb://timeclock-service
+          predicates:
+            - Path=/api/timeclock/**
+    discovery:
+      locator:
+        enabled: false
+        lower-case-service-id: true
 
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+# Rutas públicas en el gateway (saltan el filtro de autenticación Firebase)
+security:
+  public-paths:
+    - /actuator/**
+    - /auth/**
+    - /public/**
+    - /docs/**
+    - /swagger-ui/**
+    - /v3/api-docs/**
+    - /favicon.ico
+    - /
+
+# CORS (CSV)
 cors:
   allowed-origins: "http://localhost:3000,http://localhost:4200"
   allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
   allowed-headers: "*"
   exposed-headers: "X-User-Id,X-User-Email,X-User-Name,X-User-Roles"
   allow-credentials: true
+
+# JWT interno emitido por el gateway (HS256)
+auth:
+  internal:
+    enabled: true
+    issuer: timelogic-gw
+    audience: timelogic-services
+    ttl-seconds: 600
+    secret: "CHANGE_ME_min_32_chars________________________________"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,env,metrics,threaddump"
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: INFO
+    reactor.netty: WARN
+    com.timelogic: INFO

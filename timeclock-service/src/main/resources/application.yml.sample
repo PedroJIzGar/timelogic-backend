@@ -1,9 +1,9 @@
 spring:
   application:
-    name: user-service
+    name: timeclock-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/userdb
+    url: jdbc:postgresql://localhost:5434/timeclockdb
     username: timelogic
     password: timelogic
 
@@ -15,7 +15,7 @@ spring:
       hibernate.format_sql: true
 
 server:
-  port: 8091
+  port: 8092
 
 eureka:
   client:
@@ -24,7 +24,6 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
 
-# Resource Server: validar el JWT interno del gateway (HS256)
 jwt:
   issuer: timelogic-gw
   audience: timelogic-services

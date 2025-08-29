@@ -1,39 +1,47 @@
+
+---
+
+# 2) `.gitignore` (raíz)
+
+```gitignore
 # Maven
 target/
+**/target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
 release.properties
 
-# Logs & runtime
-logs/
-*.log
-*.tmp
-
 # IDEs
+# IntelliJ
+.idea/
+*.iml
 # Eclipse
 .project
 .classpath
 .settings/
-# IntelliJ
-.idea/
-*.iml
 # VSCode
 .vscode/
+
+# Logs & runtime
+logs/
+**/logs/
+*.log
+*.tmp
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Spring config: NO subir secretos reales
-# deja un sample y usa -local para tu máquina
+# Spring configs - NO subir secretos reales
 **/application-local.yml
 **/application-local.yaml
 **/application-dev-local.yml
 **/application-dev-local.yaml
 **/application-secrets.yml
 **/application-secrets.yaml
-
-# Docker
+**/firebase-*.json
+**/*.jks
+**/*.keystore
 *.env
 .env
